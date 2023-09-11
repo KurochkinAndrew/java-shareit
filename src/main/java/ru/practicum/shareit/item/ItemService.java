@@ -15,6 +15,7 @@ import java.util.List;
 public class ItemService {
     private final ItemStorage itemStorage;
     private final UserService userService;
+
     public ItemDto addItem(ItemDto itemDto, Long userId) {
         userService.getUserById(userId);
         return ItemMapper.toItemDto(itemStorage.addItem(itemDto, userId));
