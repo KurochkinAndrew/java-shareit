@@ -12,7 +12,7 @@ import ru.practicum.shareit.request.ItemRequest;
 public class Item {
     private Long id;
     private String name;
-    private String Description;
+    private String description;
     private boolean available;
     private Long ownerId;
     private ItemRequest request;
