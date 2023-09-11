@@ -15,17 +15,17 @@ import java.util.List;
 public class ItemService {
     private final ItemStorage itemStorage;
     private final UserService userService;
-    public ItemDto addItem(ItemDto itemDto, Long userId){
+    public ItemDto addItem(ItemDto itemDto, Long userId) {
         userService.getUserById(userId);
         return ItemMapper.toItemDto(itemStorage.addItem(itemDto, userId));
     }
 
-    public ItemDto getItemDtoById(Long itemId){
+    public ItemDto getItemDtoById(Long itemId) {
         if (itemStorage.getItemById(itemId) != null) return ItemMapper.toItemDto(itemStorage.getItemById(itemId));
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
-    public ItemDto refreshItem(Long itemId, ItemDto itemDto, Long userId){
+    public ItemDto refreshItem(Long itemId, ItemDto itemDto, Long userId) {
         Item item = itemStorage.getItemById(itemId);
         if (item == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         if (!userId.equals(item.getOwnerId())) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -39,7 +39,7 @@ public class ItemService {
         return ItemMapper.toItemDto(itemStorage.getItemById(itemId));
     }
 
-    public List<Item> getItemsOfUser(Long userId){
+    public List<Item> getItemsOfUser(Long userId) {
         if (userId != null) return itemStorage.getItemsOfUser(userId);
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
