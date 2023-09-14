@@ -22,7 +22,8 @@ public class ItemService {
     }
 
     public ItemDto getItemDtoById(Long itemId) {
-        if (itemStorage.getItemById(itemId) != null) return ItemMapper.toItemDto(itemStorage.getItemById(itemId));
+        Item item = itemStorage.getItemById(itemId);
+        if (item != null) return ItemMapper.toItemDto(item);
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
@@ -33,8 +34,8 @@ public class ItemService {
         String itemDtoName = itemDto.getName();
         String itemDtoDescription = itemDto.getDescription();
         Boolean itemDtoAvailable = itemDto.getAvailable();
-        if (itemDtoName != null) item.setName(itemDtoName);
-        if (itemDtoDescription != null) item.setDescription(itemDtoDescription);
+        if (itemDtoName != null && !itemDtoName.isBlank()) item.setName(itemDtoName);
+        if (itemDtoDescription != null && !itemDtoName.isBlank()) item.setDescription(itemDtoDescription);
         if (itemDtoAvailable != null) item.setAvailable(itemDtoAvailable);
         itemStorage.refreshItem(itemId, item);
         return ItemMapper.toItemDto(itemStorage.getItemById(itemId));
