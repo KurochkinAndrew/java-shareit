@@ -35,7 +35,7 @@ public class ItemService {
         String itemDtoDescription = itemDto.getDescription();
         Boolean itemDtoAvailable = itemDto.getAvailable();
         if (itemDtoName != null && !itemDtoName.isBlank()) item.setName(itemDtoName);
-        if (itemDtoDescription != null && !itemDtoName.isBlank()) item.setDescription(itemDtoDescription);
+        if (itemDtoDescription != null && !itemDtoDescription.isBlank()) item.setDescription(itemDtoDescription);
         if (itemDtoAvailable != null) item.setAvailable(itemDtoAvailable);
         itemStorage.refreshItem(itemId, item);
         return ItemMapper.toItemDto(itemStorage.getItemById(itemId));
