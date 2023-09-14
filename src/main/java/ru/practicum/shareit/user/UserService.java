@@ -14,8 +14,9 @@ public class UserService {
     private final UserStorage userStorage;
 
     public User getUserById(Long id) {
+        User user = userStorage.getUserById(id);
         if (id == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        if (userStorage.getUserById(id) != null) return userStorage.getUserById(id);
+        if (user != null) return user;
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
@@ -26,11 +27,11 @@ public class UserService {
     }
 
     public User refreshUser(Long id, User user) {
+        User user1 = userStorage.getUserById(id);
         if (userStorage.getHashMapOfEmails().containsValue(user.getEmail()) &&
-                !userStorage.getUserById(id).getEmail().equals(user.getEmail()))
+                !user1.getEmail().equals(user.getEmail()))
             throw new ResponseStatusException(HttpStatus.CONFLICT);
         if (id == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        User user1 = userStorage.getUserById(id);
         if (user1 == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         String userName = user.getName();
         String userEmail = user.getEmail();
