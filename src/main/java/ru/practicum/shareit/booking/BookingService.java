@@ -34,7 +34,7 @@ public class BookingService {
                     " или равно времени конца бронирования!");
         }
         Booking booking = bookingMapper.fromBookingDto(bookingDto, userId, Status.WAITING);
-        if (booking.getItem().getOwnerId() == userId) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        if (booking.getItem().getOwnerId().equals(userId) ) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         if (!booking.getItem().isAvailable()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Нельзя забронировать недоступную вещь!");
         return bookingMapper.toBookingDtoForResponse(bookingRepository.save(booking));
@@ -49,7 +49,7 @@ public class BookingService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Бронирования с id = " + bookingId +
                     " не существует!");
         }
-        if (booking.getBooker().getId() != userId && booking.getItem().getOwnerId() != userId)
+        if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwnerId().equals(userId))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         return bookingMapper.toBookingDtoForResponse(booking);
     }
@@ -62,7 +62,7 @@ public class BookingService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Бронирования с id = " + bookingId +
                     " не существует!");
         }
-        if (booking.getItem().getOwnerId() != userId)
+        if (!booking.getItem().getOwnerId().equals(userId))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         if (!booking.getStatus().equals(Status.WAITING)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         if (approved) {

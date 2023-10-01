@@ -18,7 +18,4 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     @Query("SELECT c FROM Comment c WHERE c.itemId = ?1")
     List<Comment> getCommentsByItemId(Long itemId);
-/*
-    @Query("SELECT c FROM Comment c WHERE c.item.ownerId = ?2")
-    List<Comment> getComments(Long itemOwnerId);*/
 }

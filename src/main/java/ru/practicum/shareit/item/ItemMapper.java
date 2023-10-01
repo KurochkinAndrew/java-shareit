@@ -47,9 +47,9 @@ public class ItemMapper {
                         LocalDateTime.now()));
         BookingDto lastBooking = null;
         BookingDto nearestBooking = null;
-        if (!lastBookings.isEmpty() && item.getOwnerId() == userId) lastBooking =
+        if (!lastBookings.isEmpty() && item.getOwnerId().equals(userId)) lastBooking =
                 bookingMapper.toBookingDto(lastBookings.get(0));
-        if (!nextBookings.isEmpty() && item.getOwnerId() == userId)
+        if (!nextBookings.isEmpty() && item.getOwnerId().equals(userId))
             nearestBooking = bookingMapper.toBookingDto(nextBookings.get(0));
         return new ItemDtoWithBooking(item.getId(),
                 item.getName(),
