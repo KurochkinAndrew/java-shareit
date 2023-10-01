@@ -2,7 +2,10 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.comment.Comment;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 import ru.practicum.shareit.item.model.Item;
 
 import javax.validation.Valid;
@@ -23,8 +26,8 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemDtoById(@PathVariable("itemId") Long itemId) {
-        return itemService.getItemDtoById(itemId);
+    public ItemDtoWithBooking getItemDtoById(@PathVariable("itemId") Long itemId, @RequestHeader("X-Sharer-User-Id") Long userId) {
+        return itemService.getItemById(itemId, userId);
     }
 
     @PatchMapping("/{itemId}")
@@ -34,12 +37,18 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<Item> getItemsOfUser(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemDtoWithBooking> getItemsOfUser(@RequestHeader("X-Sharer-User-Id") Long userId) {
         return itemService.getItemsOfUser(userId);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchItemByNameOrDescription(@RequestParam(value = "text") String searchString) {
+    public List<Item> searchItemByNameOrDescription(@RequestParam(value = "text") String searchString) {
         return itemService.searchItemByNameOrDescription(searchString);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(@RequestBody @Valid Comment comment, @PathVariable Long itemId,
+                                 @RequestHeader("X-Sharer-User-Id") Long authorId) {
+        return itemService.addComment(comment, itemId, authorId);
     }
 }
