@@ -57,7 +57,7 @@ public class BookingService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Бронирования с id = " + bookingId +
                     " не существует!");
         }
-        if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwnerId().equals(userId)){
+        if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwnerId().equals(userId)) {
             log.info("Пользователь не является создателем бронирования или владельцем вещи:" +
                     " bookingId={}, userId={}", bookingId, userId);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -91,18 +91,19 @@ public class BookingService {
     public List<Booking> getBookings(Long userId, String state) {
         if (!userExistenceChecker.isUserExist(userId)) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Пользователя с id = " + userId + " не существует!");
-        switch (state) {
-            case "ALL":
+        State enumState = parseState(state);
+        switch (enumState) {
+            case ALL:
                 return bookingRepository.getBookingsOfUser(userId);
-            case "CURRENT":
+            case CURRENT:
                 return bookingRepository.getBookingsOfUserWithStartBeforeAndEndAfter(userId, LocalDateTime.now());
-            case "PAST":
+            case PAST:
                 return bookingRepository.getBookingsOfUserWithEndBefore(userId, LocalDateTime.now());
-            case "FUTURE":
+            case FUTURE:
                 return bookingRepository.getBookingsOfUserWithStartAfter(userId, LocalDateTime.now());
-            case "WAITING":
+            case WAITING:
                 return bookingRepository.getBookingsOfUserWithWaitingStatus(userId);
-            case "REJECTED":
+            case REJECTED:
                 return bookingRepository.getBookingsOfUserWithRejectedStatus(userId);
             default:
                 throw new UnsupportedStatusException("Unknown state: " + state);
@@ -112,21 +113,32 @@ public class BookingService {
     public List<Booking> getBookingsOfOwnerItems(Long userId, String state) {
         if (!userExistenceChecker.isUserExist(userId)) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Пользователя с id = " + userId + " не существует!");
-        switch (state) {
-            case "ALL":
+        State enumState = parseState(state);
+        switch (enumState) {
+            case ALL:
                 return bookingRepository.getBookingsOfOwnerItems(userId);
-            case "CURRENT":
+            case CURRENT:
                 return bookingRepository.getBookingsOfOwnerItemsWithStartBeforeAndEndAfter(userId, LocalDateTime.now());
-            case "PAST":
+            case PAST:
                 return bookingRepository.getBookingsOfOwnerItemsWithEndBefore(userId, LocalDateTime.now());
-            case "FUTURE":
+            case FUTURE:
                 return bookingRepository.getBookingsOfOwnerItemsWithStartAfter(userId, LocalDateTime.now());
-            case "WAITING":
+            case WAITING:
                 return bookingRepository.getBookingsOfOwnerItemsWithWaitingStatus(userId);
-            case "REJECTED":
+            case REJECTED:
                 return bookingRepository.getBookingsOfOwnerItemsWithRejectedStatus(userId);
             default:
                 throw new UnsupportedStatusException("Unknown state: " + state);
         }
+    }
+
+    private State parseState(String state) {
+        State status;
+        try {
+            status = State.valueOf(state.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new UnsupportedStatusException("Unknown state: " + state);
+        }
+        return status;
     }
 }

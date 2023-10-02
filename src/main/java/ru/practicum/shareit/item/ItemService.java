@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -79,13 +80,12 @@ public class ItemService {
     public List<ItemDtoWithBooking> getItemsOfUser(Long userId) {
         log.info("Получение вещей пользователя: userId={}", userId);
         if (!userChecker.isUserExist(userId)) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        ArrayList<Item> items = new ArrayList<>(itemStorage.getItemsOfUser(userId));
-        ArrayList<ItemDtoWithBooking> itemsDto = new ArrayList<>();
-        for (Item item : items) {
+        List<Item> items = itemStorage.getItemsOfUser(userId);
+        List<ItemDtoWithBooking> itemsDto = items.stream().map(item -> {
             ItemDtoWithBooking itemDtoWithBooking = itemMapper.toItemDtoWithBooking(item, userId);
             itemDtoWithBooking.setComments(getCommentsByItemId(item.getId()));
-            itemsDto.add(itemDtoWithBooking);
-        }
+            return itemDtoWithBooking;
+        }).collect(Collectors.toList());
         log.info("Получение вещей пользователя завершено: userId={}", userId);
         return itemsDto;
     }
@@ -111,11 +111,8 @@ public class ItemService {
     }
 
     private List<CommentDto> getCommentsByItemId(Long itemId) {
-        ArrayList<CommentDto> commentsDto = new ArrayList<>();
-        ArrayList<Comment> comments = new ArrayList<>(itemStorage.getCommentsByItemId(itemId));
-        for (Comment comment : comments) {
-            commentsDto.add(itemMapper.toCommentDto(comment));
-        }
+        List<CommentDto> commentsDto = itemStorage.getCommentsByItemId(itemId).stream()
+                .map(comment -> itemMapper.toCommentDto(comment)).collect(Collectors.toList());
         return commentsDto;
     }
 }
