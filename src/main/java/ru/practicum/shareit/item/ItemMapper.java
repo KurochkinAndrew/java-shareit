@@ -14,6 +14,7 @@ import ru.practicum.shareit.item.model.Item;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -40,11 +41,11 @@ public class ItemMapper {
     }
 
     public ItemDtoWithBooking toItemDtoWithBooking(Item item, Long userId) {
-        ArrayList<Booking> lastBookings = new ArrayList<>(bookingRepository.getLastBooking(item.getOwnerId(),
-                item.getId(), LocalDateTime.now()));
-        ArrayList<Booking> nextBookings =
-                new ArrayList<>(bookingRepository.getNextBooking(item.getOwnerId(), item.getId(),
-                        LocalDateTime.now()));
+        List<Booking> lastBookings = bookingRepository.getLastBooking(item.getOwnerId(),
+                item.getId(), LocalDateTime.now());
+        List<Booking> nextBookings =
+                bookingRepository.getNextBooking(item.getOwnerId(), item.getId(),
+                        LocalDateTime.now());
         BookingDto lastBooking = null;
         BookingDto nearestBooking = null;
         if (!lastBookings.isEmpty() && item.getOwnerId().equals(userId)) lastBooking =

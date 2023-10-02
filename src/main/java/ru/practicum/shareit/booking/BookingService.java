@@ -1,6 +1,9 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -15,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class BookingService {
     private final BookingRepository bookingRepository;
@@ -23,11 +27,12 @@ public class BookingService {
     private final BookingMapper bookingMapper;
 
     public BookingDtoForResponse addBooking(BookingDto bookingDto, Long userId) {
+        log.info("Создание бронирования: itemId={}, userId={}", bookingDto.getItemId(), userId);
         if (!userExistenceChecker.isUserExist(userId)) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Пользователя с id = " + userId + "не существует!");
+                "Пользователя с id = " + userId + " не существует!");
         if (!itemExistenceChecker.isItemExist(bookingDto.getItemId()))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Вещи с id = " + bookingDto.getItemId() + "не существует!");
+                    "Вещи с id = " + bookingDto.getItemId() + " не существует!");
         if (bookingDto.getStart().isAfter(bookingDto.getEnd())
                 || bookingDto.getStart().isEqual(bookingDto.getEnd())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Время начала бронирования не может быть позже" +
@@ -37,24 +42,32 @@ public class BookingService {
         if (booking.getItem().getOwnerId().equals(userId)) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         if (!booking.getItem().isAvailable()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Нельзя забронировать недоступную вещь!");
+        log.info("Создание бронирования завершено: itemId={}, userId={}", bookingDto.getItemId(), userId);
         return bookingMapper.toBookingDtoForResponse(bookingRepository.save(booking));
     }
 
     public BookingDtoForResponse getBookingById(Long bookingId, Long userId) {
+        log.info("Получение бронирования: bookingId={}, userId={}", bookingId, userId);
         Booking booking;
         try {
             booking = bookingRepository.getReferenceById(bookingId);
             booking.getItem();
         } catch (EntityNotFoundException e) {
+            log.info("Бронирование не найдено: bookingId={}, userId={}", bookingId, userId);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Бронирования с id = " + bookingId +
                     " не существует!");
         }
-        if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwnerId().equals(userId))
+        if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwnerId().equals(userId)){
+            log.info("Пользователь не является создателем бронирования или владельцем вещи:" +
+                    " bookingId={}, userId={}", bookingId, userId);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        log.info("Получение бронирования завершено: bookingId={}, userId={}", bookingId, userId);
         return bookingMapper.toBookingDtoForResponse(booking);
     }
 
     public BookingDtoForResponse approveOrRejectBooking(Long bookingId, Long userId, Boolean approved) {
+        log.info("Изменение статуса бронирования: bookingId={}, userId={}, approved={}", bookingId, userId, approved);
         Booking booking;
         try {
             booking = bookingRepository.getReferenceById(bookingId);
@@ -67,15 +80,17 @@ public class BookingService {
         if (!booking.getStatus().equals(Status.WAITING)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         if (approved) {
             booking.setStatus(Status.APPROVED);
+            log.info("Пользователь подтвердил бронирование: bookingId={}, userId={}", bookingId, userId);
         } else {
             booking.setStatus(Status.REJECTED);
+            log.info("Пользователь отклонил бронирование: bookingId={}, userId={}", bookingId, userId);
         }
         return bookingMapper.toBookingDtoForResponse(bookingRepository.save(booking));
     }
 
     public List<Booking> getBookings(Long userId, String state) {
         if (!userExistenceChecker.isUserExist(userId)) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Пользователя с id = " + userId + "не существует!");
+                "Пользователя с id = " + userId + " не существует!");
         switch (state) {
             case "ALL":
                 return bookingRepository.getBookingsOfUser(userId);
@@ -96,7 +111,7 @@ public class BookingService {
 
     public List<Booking> getBookingsOfOwnerItems(Long userId, String state) {
         if (!userExistenceChecker.isUserExist(userId)) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Пользователя с id = " + userId + "не существует!");
+                "Пользователя с id = " + userId + " не существует!");
         switch (state) {
             case "ALL":
                 return bookingRepository.getBookingsOfOwnerItems(userId);
